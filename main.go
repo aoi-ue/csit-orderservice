@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -16,13 +20,28 @@ type GatekeeperAccessRequest struct {
 	SecretInput                 string `json:"secretInput"`
 }
 
+type GatekeeperResponse struct {
+	Status  string      `json:"status"`  // e.g., "success" or "error"
+	Message string      `json:"message"` // A message providing more details
+	Data    interface{} `json:"data"`    // Any additional data returned by the service
+}
+
 func main() {
 	r := gin.Default()
 
+	// to receive 
 	r.POST("/api/toyProductionKey", handleToyProductionKey)
-	r.POST("/api/gatekeeper/access", handleGatekeeperAccess)
 
-	r.Run(":8080")
+	// to send 
+	r.POST("/api/gatekeeper/access", handleGatekeeperAccess)
+	
+	// Use environment variable for port, default to 8080 if not set
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	r.Run(":" + port)
 }
 
 func handleToyProductionKey(c *gin.Context) {
@@ -38,10 +57,8 @@ func handleToyProductionKey(c *gin.Context) {
 		return
 	}
 
-	// Process the toy production key
-	// ...
-
-	c.Status(http.StatusOK)
+	// Return the received toy production key in the response
+	c.JSON(http.StatusOK, gin.H{"toyProductionKey": req.ToyProductionKey})
 }
 
 func handleGatekeeperAccess(c *gin.Context) {
@@ -57,10 +74,46 @@ func handleGatekeeperAccess(c *gin.Context) {
 		return
 	}
 
-	// Process the order service host or IP address and secret input
-	// ...
+	// Send request to the Gatekeeper Service
+	gatekeeperResponse, err := sendToGatekeeperService(req.OrderServiceHostOrIpAddress, req.SecretInput)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to access Gatekeeper Service"})
+		return
+	}
 
-	c.Status(http.StatusOK)
+	// Process the response from the Gatekeeper Service
+	c.JSON(http.StatusOK, gatekeeperResponse)
+}
+
+func sendToGatekeeperService(orderServiceHostOrIpAddress, secretInput string) (GatekeeperResponse, error) {
+	gatekeeperURL := "https://dec-2024-mini-challenge.csit-events.sg/api/gatekeeper/access"
+
+	// Create the request body
+	requestBody, err := json.Marshal(GatekeeperAccessRequest{
+		OrderServiceHostOrIpAddress: orderServiceHostOrIpAddress,
+		SecretInput:                 secretInput,
+	})
+	if err != nil {
+		return GatekeeperResponse{}, err
+	}
+
+	// Send the POST request to the Gatekeeper Service
+	resp, err := http.Post(gatekeeperURL, "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return GatekeeperResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return GatekeeperResponse{}, fmt.Errorf("failed to access Gatekeeper Service, status code: %d", resp.StatusCode)
+	}
+
+	var gatekeeperResponse GatekeeperResponse
+	if err := json.NewDecoder(resp.Body).Decode(&gatekeeperResponse); err != nil {
+		return GatekeeperResponse{}, err
+	}
+
+	return gatekeeperResponse, nil
 }
 
 func validateToyProductionKey(key string) bool {
