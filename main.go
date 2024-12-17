@@ -26,6 +26,12 @@ type GatekeeperResponse struct {
 	Data    interface{} `json:"data"`    // Any additional data returned by the service
 }
 
+// Response represents the response structure sent back to the Toy Production Service.
+type Response struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
 func main() {
 	r := gin.Default()
 
@@ -57,9 +63,14 @@ func handleToyProductionKey(c *gin.Context) {
 		return
 	}
 
-	// Return the received toy production key in the response
-	c.JSON(http.StatusOK, gin.H{"toyProductionKey": req.ToyProductionKey})
+	// Process the valid toy production key (e.g., store it, log it, etc.)
+	// Here, we just respond with a success message
+	c.JSON(http.StatusOK, Response{
+		Status:  "success",
+		Message: "Toy production key received successfully",
+	})
 }
+
 
 func handleGatekeeperAccess(c *gin.Context) {
 	var req GatekeeperAccessRequest
@@ -86,7 +97,7 @@ func handleGatekeeperAccess(c *gin.Context) {
 }
 
 func sendToGatekeeperService(orderServiceHostOrIpAddress, secretInput string) (GatekeeperResponse, error) {
-	gatekeeperURL := "https://dec-2024-mini-challenge.csit-events.sg/api/gatekeeper/access"
+	gatekeeperURL := "dec-2024-mini-challenge.csit-events.sg/api/gatekeeper/access"
 
 	// Create the request body
 	requestBody, err := json.Marshal(GatekeeperAccessRequest{
@@ -118,15 +129,21 @@ func sendToGatekeeperService(orderServiceHostOrIpAddress, secretInput string) (G
 
 func validateToyProductionKey(key string) bool {
 	// Validate the toy production key format
-	// The correct format is: <Most popular toy name (capitalize the first letter)>123! (no spaces)
 	parts := strings.Split(key, "123!")
 	if len(parts) != 2 || parts[1] != "" {
 		return false
 	}
 
-	// Capitalize the first letter of the toy name
+	// Check if the toy name is valid (you could maintain a list of popular toys)
+	validToyNames := []string{"TeddyBear", "Doll", "RaceCar", "ActionFigure"}
 	toyName := strings.ToUpper(string(parts[0][0])) + parts[0][1:]
-	return toyName == "Plush"
+
+	for _, validToy := range validToyNames {
+		if toyName == validToy {
+			return true
+		}
+	}
+	return false
 }
 
 func validateSecretInput(input string) bool {
