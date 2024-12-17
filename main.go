@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -27,8 +28,8 @@ func handleGatekeeperRequest(c *gin.Context) {
         }
 
         fmt.Println("Received request:")
-        fmt.Printf("  OrderServiceHostOrIpAddress: %s\n", reqBody.OrderServiceHostOrIpAddress)
-        fmt.Printf("  SecretInput: %s\n", reqBody.SecretInput)
+        fmt.Printf("OrderServiceHostOrIpAddress: %s\n", reqBody.OrderServiceHostOrIpAddress)
+        fmt.Printf("SecretInput: %s\n", reqBody.SecretInput)
 
         // Send request to CSIT Mini Challenge API
         client := &http.Client{}
@@ -63,20 +64,34 @@ func handleGatekeeperRequest(c *gin.Context) {
 }
 
 func handleToyProductionKeyRequest(c *gin.Context) {
-	var reqBody ToyProductionKeyRequest
-	if err := c.BindJSON(&reqBody); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-	}
+    var reqBody ToyProductionKeyRequest
+    if err := c.BindJSON(&reqBody); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	fmt.Printf("Received toyProductionKey: %s\n", reqBody.ToyProductionKey)
+    fmt.Printf("Received toyProductionKey: %s\n", reqBody.ToyProductionKey)
 
-	// Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
-	// For now, let's just print it to the console:
-	fmt.Println("Printing the toy production key to the console:")
-	fmt.Println(reqBody.ToyProductionKey)
+    // Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
+    // For now, let's just print it to the console:
+    fmt.Println("Printing the toy production key to the console:")
+    fmt.Println(reqBody.ToyProductionKey)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Toy production key received successfully"})
+    // Marshal the entire request body
+    bodyBytes, err := ioutil.ReadAll(c.Request.Body)
+    if err != nil {
+        fmt.Println("Error reading request body:", err)
+        return
+    }
+
+    // Write the request body to a file
+    err = ioutil.WriteFile("request_body.json", bodyBytes, 0644)
+    if err != nil {
+        fmt.Println("Error writing request body to file:", err)
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Toy production key received successfully"})
 }
 
 func main() {
