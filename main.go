@@ -63,22 +63,18 @@ func handleGatekeeperRequest(c *gin.Context) {
 }
 
 func handleToyProductionKeyRequest(c *gin.Context) {
-	var reqBody ToyProductionKeyRequest
-	if err := c.BindJSON(&reqBody); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-	}
+    var reqBody ToyProductionKeyRequest
+    if err := c.BindJSON(&reqBody); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	fmt.Printf("Received toyProductionKey: %s\n", reqBody.ToyProductionKey)
+    fmt.Printf("Received toyProductionKey: %s\n", reqBody.ToyProductionKey)
 
-	// Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
-	// For now, let's just print it to the console:
-	fmt.Println("Printing the toy production key to the console:")
-	fmt.Println(reqBody.ToyProductionKey)
+    // Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Toy production key received successfully"})
+    c.JSON(http.StatusOK, gin.H{"toyProductionKey": reqBody.ToyProductionKey})
 }
-
 func main() {
         r := gin.Default()
 
