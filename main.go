@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -73,27 +72,9 @@ func handleToyProductionKeyRequest(c *gin.Context) {
     fmt.Printf("Received toyProductionKey: %s\n", reqBody.ToyProductionKey)
 
     // Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
-    // For now, let's just print it to the console:
-    fmt.Println("Printing the toy production key to the console:")
-    fmt.Println(reqBody.ToyProductionKey)
 
-    // Marshal the entire request body
-    bodyBytes, err := ioutil.ReadAll(c.Request.Body)
-    if err != nil {
-        fmt.Println("Error reading request body:", err)
-        return
-    }
-
-    // Write the request body to a file
-    err = ioutil.WriteFile("request_body.json", bodyBytes, 0644)
-    if err != nil {
-        fmt.Println("Error writing request body to file:", err)
-        return
-    }
-
-    c.JSON(http.StatusOK, gin.H{"message": "Toy production key received successfully"})
+    c.JSON(http.StatusOK, gin.H{"toyProductionKey": reqBody.ToyProductionKey})
 }
-
 func main() {
         r := gin.Default()
 
