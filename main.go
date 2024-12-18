@@ -17,7 +17,13 @@ type RequestBody struct {
 
 type ToyProductionKeyRequest struct {
         ToyProductionKey string `json:"toyProductionKey"`
+		Secret string `json:"secret"`
 }
+
+type ToyProductionKeyResponse struct {
+	Key string `json:"key"`
+}
+
 
 func handleGatekeeperRequest(c *gin.Context) {
         var reqBody RequestBody
@@ -62,30 +68,26 @@ func handleGatekeeperRequest(c *gin.Context) {
 }
 
 func handleToyProductionKeyRequest(c *gin.Context) {
-    var reqBody ToyProductionKeyRequest
-    if err := c.BindJSON(&reqBody); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	var request ToyProductionKeyRequest
+	if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+	}
 
-    fmt.Printf("Request Method: %s\n", c.Request.Method)
-    fmt.Printf("Request URL: %s\n", c.Request.URL)
-    fmt.Printf("Request Headers: %+v\n", c.Request.Header)
-    fmt.Printf("Request Body: %+v\n", reqBody)
-    fmt.Printf("toyProductionKey: %s\n", reqBody.ToyProductionKey)
-    // Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
+	// Validate the secret 
+	if request.Secret != "Plush123!" { 
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid secret"})
+			return
+	}
 
-    response := gin.H{
-        "toyProductionKey": reqBody.ToyProductionKey,
-        "message": "Key successfully returned to endpoint http://csit-orderservice.onrender.com/api/toyProductionKey",
-    }
+	// Assuming the key is received in the request body from Postman
+	var keyResponse ToyProductionKeyResponse
+	if err := c.BindJSON(&keyResponse); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid key response"})
+			return
+	}
 
-    fmt.Printf("Response Status Code: %d\n", http.StatusOK)
-    fmt.Printf("Response Headers: %+v\n", c.Writer.Header())
-    fmt.Printf("Response Body: %+v\n", response)
-
-    c.JSON(http.StatusOK, response)
-	
+	c.JSON(http.StatusOK, keyResponse)
 }
 func main() {
         r := gin.Default()
