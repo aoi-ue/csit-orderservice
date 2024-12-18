@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -72,8 +73,49 @@ func handleToyProductionKeyRequest(c *gin.Context) {
     fmt.Printf("Received toyProductionKey: %s\n", reqBody.ToyProductionKey)
 
     // Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
+    //c.JSON(http.StatusOK, gin.H{"toyProductionKey": reqBody.ToyProductionKey})
 
-    c.JSON(http.StatusOK, gin.H{"toyProductionKey": reqBody.ToyProductionKey})
+	// If you need to forward the toyProductionKey to another service, do it here
+    // For example, you might want to send it to a Toy Production Service
+    client := &http.Client{}
+    targetURL := "https://example.com/api/toyProduction" // Replace with actual service URL
+    jsonData, err := json.Marshal(reqBody)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error marshalling request body"})
+        return
+    }
+
+    req, err := http.NewRequest(http.MethodPost, targetURL, bytes.NewReader(jsonData))
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating request"})
+        return
+    }
+
+    req.Header.Set("Content-Type", "application/json")
+
+    // Send request and handle response
+    resp, err := client.Do(req)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error sending request"})
+        return
+    }
+    defer resp.Body.Close()
+
+    // Read and process the response from the Toy Production Service
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error reading response body"})
+        return
+    }
+
+    // Check the status code and respond accordingly
+    if resp.StatusCode != http.StatusOK {
+        c.JSON(resp.StatusCode, gin.H{"error": string(body)})
+        return
+    }
+
+    // If successful, return the response body
+    c.JSON(http.StatusOK, gin.H{"data": string(body)})
 }
 func main() {
         r := gin.Default()
