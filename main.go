@@ -79,7 +79,7 @@ func handleToyProductionKeyRequest(c *gin.Context) {
 
 	// Prepare to send the toyProductionKey to the Toy Production Service
     client := &http.Client{}
-    targetURL := "https://csit-orderservice.onrender.com/api/toyProduction" // Ensure the URL is correct
+    targetURL := "http://csit-orderservice.onrender.com/api/toyProduction" // Ensure the URL is correct
     jsonData, err := json.Marshal(reqBody)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error marshalling request body"})
