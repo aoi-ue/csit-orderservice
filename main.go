@@ -73,12 +73,13 @@ func handleToyProductionKeyRequest(c *gin.Context) {
     fmt.Printf("Received toyProductionKey: %s\n", reqBody.ToyProductionKey)
 
     // Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
-    //c.JSON(http.StatusOK, gin.H{"toyProductionKey": reqBody.ToyProductionKey})
 
-	// If you need to forward the toyProductionKey to another service, do it here
-    // For example, you might want to send it to a Toy Production Service
+    // c.JSON(http.StatusOK, gin.H{"toyProductionKey": reqBody.ToyProductionKey})
+
+
+	// Prepare to send the toyProductionKey to the Toy Production Service
     client := &http.Client{}
-    targetURL := "csit-orderservice.onrender.com/api/toyProduction" // Replaced with actual service URL
+    targetURL := "https://csit-orderservice.onrender.com/api/toyProduction" // Ensure the URL is correct
     jsonData, err := json.Marshal(reqBody)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error marshalling request body"})
@@ -114,7 +115,7 @@ func handleToyProductionKeyRequest(c *gin.Context) {
         return
     }
 
-    // If successful, return the response body
+    // If successful, return the response body (which should contain the toyProductionKey)
     c.JSON(http.StatusOK, gin.H{"data": string(body)})
 }
 func main() {
