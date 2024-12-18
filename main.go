@@ -74,18 +74,9 @@ func handleToyProductionKeyRequest(c *gin.Context) {
 			return
 	}
 
-	// Validate the secret 
-	if request.Secret != "Plush123!" { 
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid secret"})
-			return
-	}
+	// Assuming no secret validation is required 
 
-	// Assuming the key is received in the request body from Postman
 	var keyResponse ToyProductionKeyResponse
-	if err := c.BindJSON(&keyResponse); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid key response"})
-			return
-	}
 
 	c.JSON(http.StatusOK, keyResponse)
 }
