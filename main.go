@@ -80,8 +80,18 @@ func handleToyProductionKeyRequest(c *gin.Context) {
 	// Do something with the key, e.g., log it or store it in a database
 	fmt.Printf("Received toy production key: %s\n", key)
 
-	// Send a success response
-	c.JSON(http.StatusOK, gin.H{"message": "Key received successfully"})
+        // Send a success response
+	response := gin.H{"message": "Key received successfully"}
+	c.JSON(http.StatusOK, response)
+
+	        // Log the entire response
+	responseBytes, err := json.Marshal(response)
+	if err != nil {
+		// Handle error, e.g., log the error
+		fmt.Printf("Error marshalling response: %v\n", err)
+		return
+	}
+	fmt.Printf("Sending response: %s\n", string(responseBytes))
 }
 
 func main() {
