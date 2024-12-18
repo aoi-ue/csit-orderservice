@@ -74,12 +74,16 @@ func handleToyProductionKeyRequest(c *gin.Context) {
 			return
 	}
 
-	// Assuming no secret validation is required 
+	// Now you have the toyProductionKey in the request.ToyProductionKey field
+	key := request.ToyProductionKey
 
-	var keyResponse ToyProductionKeyResponse
+	// Do something with the key, e.g., log it or store it in a database
+	fmt.Printf("Received toy production key: %s\n", key)
 
-	c.JSON(http.StatusOK, keyResponse)
+	// Send a success response
+	c.JSON(http.StatusOK, gin.H{"message": "Key received successfully"})
 }
+
 func main() {
         r := gin.Default()
 
