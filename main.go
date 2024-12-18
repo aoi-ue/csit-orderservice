@@ -75,7 +75,16 @@ func handleToyProductionKeyRequest(c *gin.Context) {
     fmt.Printf("toyProductionKey: %s\n", reqBody.ToyProductionKey)
     // Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
 
-    c.JSON(http.StatusOK, gin.H{"toyProductionKey": reqBody})
+    response := gin.H{
+        "toyProductionKey": reqBody.ToyProductionKey,
+        "message": "Key successfully returned to endpoint http://csit-orderservice.onrender.com/api/toyProductionKey",
+    }
+
+    fmt.Printf("Response Status Code: %d\n", http.StatusOK)
+    fmt.Printf("Response Headers: %+v\n", c.Writer.Header())
+    fmt.Printf("Response Body: %+v\n", response)
+
+    c.JSON(http.StatusOK, response)
 	
 }
 func main() {
