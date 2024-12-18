@@ -78,7 +78,7 @@ func handleToyProductionKeyRequest(c *gin.Context) {
 	// If you need to forward the toyProductionKey to another service, do it here
     // For example, you might want to send it to a Toy Production Service
     client := &http.Client{}
-    targetURL := "https://example.com/api/toyProduction" // Replace with actual service URL
+    targetURL := "csit-orderservice.onrender.com/api/toyProduction" // Replaced with actual service URL
     jsonData, err := json.Marshal(reqBody)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error marshalling request body"})
