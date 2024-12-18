@@ -68,8 +68,11 @@ func handleToyProductionKeyRequest(c *gin.Context) {
         return
     }
 
-    fmt.Printf("Received toyProductionKey: %s\n", reqBody)
-
+    fmt.Printf("Request Method: %s\n", c.Request.Method)
+    fmt.Printf("Request URL: %s\n", c.Request.URL)
+    fmt.Printf("Request Headers: %+v\n", c.Request.Header)
+    fmt.Printf("Request Body: %+v\n", reqBody)
+    fmt.Printf("toyProductionKey: %s\n", reqBody.ToyProductionKey)
     // Process the toyProductionKey here (e.g., store it in a database, send it to another service, etc.)
 
     c.JSON(http.StatusOK, gin.H{"toyProductionKey": reqBody})
